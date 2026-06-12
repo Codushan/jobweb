@@ -11,7 +11,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<IJob | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [sortBy, setSortBy] = useState('new');
+  const [sortBy, setSortBy] = useState('deadline');
 
   // Filter state
   const [fGate, setFGate] = useState('all');
@@ -108,33 +108,34 @@ export default function Home() {
       );
     }
 
-    // Sort
+    // Sort — open jobs always on top, closed always at bottom
     filtered.sort((a, b) => {
-      const getPriority = (job: IJob) => {
-        if (job.isNewJob) return 1;
-        return isJobOpen(job.deadline) ? 2 : 3;
-      };
+      const aOpen = isJobOpen(a.deadline);
+      const bOpen = isJobOpen(b.deadline);
 
-      const pA = getPriority(a);
-      const pB = getPriority(b);
+      // Closed jobs always sink to bottom
+      if (aOpen !== bOpen) return aOpen ? -1 : 1;
 
-      if (pA !== pB) {
-        return pA - pB;
+      // Within open jobs: respect secondary sort
+      if (aOpen) {
+        if (sortBy === 'salary') {
+          const aNum = parseInt(b.salary.replace(/\D/g, '')) || 0;
+          const bNum = parseInt(a.salary.replace(/\D/g, '')) || 0;
+          return aNum - bNum;
+        } else if (sortBy === 'vacancies') {
+          return b.numberOfPositions - a.numberOfPositions;
+        } else if (sortBy === 'new') {
+          const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return bDate - aDate;
+        } else {
+          // deadline (default): soonest deadline first so users see urgent jobs first
+          return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+        }
       }
 
-      if (sortBy === 'deadline') {
-        return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-      } else if (sortBy === 'salary') {
-        const aNum = parseInt(b.salary.replace(/\D/g, '')) || 0;
-        const bNum = parseInt(a.salary.replace(/\D/g, '')) || 0;
-        return aNum - bNum;
-      } else if (sortBy === 'vacancies') {
-        return b.numberOfPositions - a.numberOfPositions;
-      } else {
-        const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return bDate - aDate;
-      }
+      // Within closed jobs: latest deadline first
+      return new Date(b.deadline).getTime() - new Date(a.deadline).getTime();
     });
 
     setFilteredJobs(filtered);
