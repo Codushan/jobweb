@@ -76,11 +76,11 @@ const jobSchema = new mongoose.Schema<IJob>(
     },
     salary: {
       type: String,
-      required: true,
+      default: '',
     },
     ageLimit: {
       type: String,
-      required: true,
+      default: '',
     },
     eligibility: {
       type: [String],
@@ -105,7 +105,7 @@ const jobSchema = new mongoose.Schema<IJob>(
     },
     description: {
       type: String,
-      required: true,
+      default: '',
     },
     qualification: {
       type: String,

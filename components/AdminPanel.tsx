@@ -73,7 +73,10 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
         body: JSON.stringify(job),
       });
 
-      if (!response.ok) throw new Error('Failed to create job');
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to create job');
+      }
 
       await fetchJobs();
       setIsFormOpen(false);
@@ -93,7 +96,10 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
         body: JSON.stringify(job),
       });
 
-      if (!response.ok) throw new Error('Failed to update job');
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to update job');
+      }
 
       await fetchJobs();
       setIsFormOpen(false);
