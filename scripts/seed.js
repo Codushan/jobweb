@@ -15,7 +15,7 @@ const jobSchema = new mongoose.Schema({
   organizationFullName: String,
   category: {
     type: String,
-    enum: ['PSU', 'CENTRAL', 'DEFENCE', 'RAILWAY', 'STATE'],
+    enum: ['PSU', 'CENTRAL', 'DEFENCE', 'RAILWAY', 'STATE', 'GENERAL'],
   },
   jobType: {
     type: String,
@@ -612,6 +612,49 @@ const sampleJobs = [
       'Written test pattern consists of general studies, reasoning, English and core engineering fields.',
     ],
   },
+  {
+    title: 'Combined Graduate Level (CGL) 2026',
+    organization: 'SSC',
+    organizationFullName: 'Staff Selection Commission',
+    category: 'GENERAL',
+    jobType: 'NON_GATE',
+    eligibleBranches: [],
+    openToNonEngineering: true,
+    numberOfPositions: 17000,
+    salary: '₹25,500 - ₹1,51,100/mo',
+    ageLimit: '18-32 years (varies by post)',
+    eligibility: [
+      "Bachelor's Degree in any discipline from a recognised university",
+      'No engineering degree required — open to all graduates',
+      'Selection: Tier-I CBT → Tier-II CBT → Skill Test / Document Verification',
+    ],
+    eligibilityFinalYear: false,
+    applicationUrl: 'https://ssc.gov.in/',
+    deadline: new Date('2026-08-10T23:59:59Z'),
+    status: 'OPEN',
+    description: "SSC CGL 2026 is one of the largest central government recruitment exams open to all graduates. Posts include Inspector, Auditor, Tax Assistant, Sub-Inspector (CBI), Statistical Investigator, and more across central ministries and departments.",
+    qualification: "Any Bachelor's Degree (Engineering graduates can also apply)",
+    minMarks: 'Pass standard in graduation',
+    selectionProcess: 'Tier-I CBT → Tier-II CBT → Skill Test / Document Verification',
+    bond: 'No bond',
+    isNewJob: true,
+    showPhases: true,
+    timeline: [
+      { event: 'Official Notification Released', date: '22 Jun 2026', description: 'SSC CGL 2026 detailed advt on ssc.gov.in', status: 'COMPLETED' },
+      { event: 'Online Applications Open', date: '22 Jun 2026', description: 'Registration on ssc.gov.in portal', status: 'ACTIVE' },
+      { event: 'Application Last Date', date: '10 Aug 2026', description: 'Submit before 11:59 PM', status: 'UPCOMING' },
+      { event: 'Tier-I Exam (CBT)', date: 'Sep–Oct 2026', description: 'Computer-based test across exam centres', status: 'UPCOMING' },
+      { event: 'Tier-II Exam (CBT)', date: 'Dec 2026', description: 'For shortlisted candidates from Tier-I', status: 'UPCOMING' },
+      { event: 'Skill Test / Document Verification', date: 'Jan–Feb 2027', description: 'Post-specific skill tests and DV', status: 'UPCOMING' },
+    ],
+    importantNotes: [
+      'Open to graduates from any stream — not limited to engineering.',
+      'Engineers are eligible and often benefit from technical aptitude in the exam.',
+      'Negative marking: 0.50 marks for each wrong answer in Tier-I and Tier-II.',
+      'Age relaxation: SC/ST +5 yrs, OBC +3 yrs, PwBD +10 yrs, Ex-Servicemen as per norms.',
+      'Over 17,000 vacancies expected across Group B and Group C posts.',
+    ],
+  },
 ];
 
 const sampleNotifications = [
@@ -621,7 +664,8 @@ const sampleNotifications = [
   { text: "NTPC Engineer Trainee 2026 – 800 Vacancies | GATE Score Required" },
   { text: "DRDO Scientist B 2026 – Written Test on 25 Aug 2026" },
   { text: "BEL Project Engineer 2026 – Apply Before 15 Jul" },
-  { text: "HAL Aerospace Engineer 2026 – Written Test Admit Cards Released" }
+  { text: "HAL Aerospace Engineer 2026 – Written Test Admit Cards Released" },
+  { text: "SSC CGL 2026 – 17,000+ Posts | All Graduates Eligible | Apply before 10 Aug" }
 ];
 
 async function seed() {

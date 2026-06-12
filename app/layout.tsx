@@ -48,12 +48,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${baloo.variable} ${hind.variable} bg-background`}>
       <head>
-        {/* Google AdSense Script */}
-        <Script
+        {/* Google AdSense Script — must be a plain <script> tag, not Next.js <Script>, to avoid data-nscript warning */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" // Place your Publisher ID here
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
         />
 
         {/* Google Analytics GA4 */}

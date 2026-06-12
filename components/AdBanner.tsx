@@ -66,28 +66,25 @@ export function AdBanner({ adSlot, adFormat = 'auto', style }: AdBannerProps) {
   }
 
   return (
-    <div 
-      className="adsense-container" 
-      style={{ 
-        margin: adStatus === 'filled' ? '24px auto' : '0 auto', 
-        textAlign: 'center', 
+    <div
+      className="adsense-container"
+      style={{
+        margin: adStatus === 'filled' ? '24px auto' : '0',
+        textAlign: 'center',
         overflow: 'hidden',
         width: '100%',
         maxWidth: '1280px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        // Keep a 1px height layout initially so that AdSense can compute parent container width on render
-        height: adStatus === 'filled' ? 'auto' : '1px',
-        opacity: adStatus === 'filled' ? 1 : 0.01,
-        transition: 'opacity 0.3s ease, margin 0.3s ease'
+        // Use visibility instead of height/opacity so AdSense can still measure the real width
+        visibility: adStatus === 'filled' ? 'visible' : 'hidden',
+        height: adStatus === 'filled' ? 'auto' : '0',
+        transition: 'margin 0.3s ease',
       }}
     >
       <ins
         id={`adsense-${adSlot}`}
         className="adsbygoogle"
-        style={style || { display: 'block' }}
-        data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" // Place your Publisher ID here
+        style={style || { display: 'block', width: '100%', minHeight: '90px' }}
+        data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
         data-ad-slot={adSlot}
         data-ad-format={adFormat}
         data-full-width-responsive="true"

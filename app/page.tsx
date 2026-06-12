@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { IJob } from '@/models/Job';
 import { AdBanner } from '@/components/AdBanner';
+import { LottieLogo } from '@/components/LottieLogo';
 
 export default function Home() {
   const [jobs, setJobs] = useState<IJob[]>([]);
@@ -168,6 +169,7 @@ export default function Home() {
       DEFENCE: 'Defence / DRDO / ISRO',
       RAILWAY: 'Railway',
       STATE: 'State Govt',
+      GENERAL: 'Non-Engg / General',
     };
     return labels[cat.toUpperCase()] || cat;
   };
@@ -305,7 +307,7 @@ export default function Home() {
         header { background: var(--navy-dark); border-bottom: 4px solid var(--saffron); position: sticky; top: 0; z-index: 200; }
         .hdr-top { background: var(--navy); padding: 5px 0; font-size: 11px; color: #a8bbdd; text-align: center; }
         .hdr-main { max-width: 1280px; margin: 0 auto; padding: 8px 16px; display: flex; align-items: center; gap: 12px; }
-        .logo-circle { width: 46px; height: 46px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+        .logo-circle { width: 46px; height: 46px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; box-shadow: 0 0 0 2px rgba(255,255,255,0.2); }
         .logo-text h1 { font-family: 'Baloo 2', sans-serif; font-size: 20px; font-weight: 800; color: #fff; line-height: 1.1; margin: 0; }
         .logo-text p { font-size: 10px; color: #a8bbdd; margin: 0; }
         .hdr-nav { margin-left: auto; display: flex; gap: 2px; }
@@ -451,6 +453,7 @@ export default function Home() {
         .tag.tmx { background: #faf5ff; color: #6b21a8; }
         .tag.tcat { background: #f3e8ff; color: #6b21a8; }
         .tag.tbr { background: #ffedd5; color: #9a3412; }
+        .tag.tgen { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-weight: 700; }
         .tag.tnew { background: #ff7a00; color: #fff; font-weight: 700; font-size: 9px; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 3px; }
         
         .dl-urgent { color: var(--red); font-weight: 700; font-size: 11px; }
@@ -532,7 +535,9 @@ export default function Home() {
           EngineerNaukri &nbsp;|&nbsp; Employment Portal for Engineers &nbsp;|&nbsp; Updated: {getLastUpdatedText()}
         </div>
         <div className="hdr-main">
-          <div className="logo-circle">⚙️</div>
+          <div className="logo-circle">
+            <LottieLogo size={46} />
+          </div>
           <div className="logo-text">
             <h1>EngineerNaukri</h1>
             <p>Employment Portal for Engineers | इंजीनियर रोजगार पोर्टल</p>
@@ -678,6 +683,7 @@ export default function Home() {
             <option value="DEFENCE">Defence / DRDO / ISRO</option>
             <option value="RAILWAY">Railway</option>
             <option value="STATE">State Govt</option>
+            <option value="GENERAL">Non-Engg / General</option>
           </select>
           <select value={fStatus} onChange={(e) => setFStatus(e.target.value)}>
             <option value="all">All Status</option>
@@ -740,6 +746,13 @@ export default function Home() {
                 onClick={() => setFType(fType === 'STATE' ? 'all' : 'STATE')}
               >
                 State Govt <span className="cnt-badge">{jobs.filter((j) => j.category === 'STATE').length}</span>
+              </li>
+              <li
+                className={fType === 'GENERAL' ? 'active-cat' : ''}
+                onClick={() => setFType(fType === 'GENERAL' ? 'all' : 'GENERAL')}
+                style={{ color: fType === 'GENERAL' ? undefined : '#b91c1c', fontWeight: 600 }}
+              >
+                🔴 Non-Engg / General <span className="cnt-badge">{jobs.filter((j) => j.category === 'GENERAL').length}</span>
               </li>
             </ul>
           </div>
@@ -833,8 +846,12 @@ export default function Home() {
                         {job.jobType === 'NON_GATE' && <span className="tag tng">Non-GATE</span>}
                         {job.jobType === 'MIXED' && <span className="tag tmx">Mixed</span>}
 
-                        {job.category && (
-                          <span className="tag tcat">{getCategoryLabel(job.category)}</span>
+                        {job.category === 'GENERAL' ? (
+                          <span className="tag tgen">Non-Engg / General</span>
+                        ) : (
+                          job.category && (
+                            <span className="tag tcat">{getCategoryLabel(job.category)}</span>
+                          )
                         )}
 
                         {job.eligibleBranches.map((branch) => (

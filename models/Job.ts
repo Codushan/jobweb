@@ -5,7 +5,7 @@ export interface IJob {
   title: string;
   organization: string;
   organizationFullName: string;
-  category: 'PSU' | 'CENTRAL' | 'DEFENCE' | 'RAILWAY' | 'STATE';
+  category: 'PSU' | 'CENTRAL' | 'DEFENCE' | 'RAILWAY' | 'STATE' | 'GENERAL';
   jobType: 'GATE' | 'NON_GATE' | 'MIXED';
   eligibleBranches: string[];
   openToNonEngineering: boolean;
@@ -54,7 +54,7 @@ const jobSchema = new mongoose.Schema<IJob>(
     },
     category: {
       type: String,
-      enum: ['PSU', 'CENTRAL', 'DEFENCE', 'RAILWAY', 'STATE'],
+      enum: ['PSU', 'CENTRAL', 'DEFENCE', 'RAILWAY', 'STATE', 'GENERAL'],
       required: true,
     },
     jobType: {
