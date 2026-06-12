@@ -8,9 +8,12 @@ const baloo = Baloo_2({ variable: '--font-baloo', subsets: ['latin'] })
 const hind = Hind({ variable: '--font-hind', weight: ['400', '600', '700'], subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Engineer Job Portal - Find Your Dream Job',
-  description: 'Browse and apply to engineering job openings from top companies. GATE, Non-GATE, and mixed eligibility jobs.',
-  generator: 'v0.app',
+  title: 'EngineerNaukri – PSU & Govt Engineering Jobs Portal | GATE & Non-GATE',
+  description: 'Find latest PSU, Central Govt, Defence, Railway & State Govt engineering job openings. GATE and Non-GATE jobs for B.Tech/BE graduates. Apply directly.',
+  keywords: 'PSU jobs, engineering jobs, GATE jobs, government jobs for engineers, BHEL recruitment, DRDO recruitment, Railway engineering jobs, B.Tech jobs',
+  verification: {
+    google: 'dea5d8251a67318d',
+  },
   icons: {
     icon: [
       {
@@ -27,6 +30,13 @@ export const metadata: Metadata = {
       },
     ],
     apple: '/apple-icon.png',
+  },
+  openGraph: {
+    title: 'EngineerNaukri – PSU & Govt Engineering Jobs Portal',
+    description: 'Find latest PSU, Central Govt, Defence & Railway engineering jobs. GATE and Non-GATE openings for B.Tech/BE graduates.',
+    url: 'https://engineersjob.netlify.app',
+    siteName: 'EngineerNaukri',
+    type: 'website',
   },
 }
 
@@ -45,6 +55,22 @@ export default function RootLayout({
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
+
+        {/* Google Analytics GA4 */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-LVGCNRXSHX"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-LVGCNRXSHX', {
+              page_path: window.location.pathname,
+            });
+          `}
+        </Script>
       </head>
       <body className="font-sans antialiased">
         {children}
