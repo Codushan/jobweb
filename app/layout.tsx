@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: 'Find latest PSU, Central Govt, Defence, Railway & State Govt engineering job openings. GATE and Non-GATE jobs for B.Tech/BE graduates. Apply directly.',
   keywords: 'PSU jobs, engineering jobs, GATE jobs, government jobs for engineers, BHEL recruitment, DRDO recruitment, Railway engineering jobs, B.Tech jobs',
   verification: {
-    google: 'dea5d8251a67318d',
+    google: 'XhNU-wKDOrj4x3Ba14LsYiTkUSrgazMU9EOcAYiX3Bc',
   },
   icons: {
     icon: [
