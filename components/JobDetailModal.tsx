@@ -71,8 +71,8 @@ export function JobDetailModal({ job, isOpen, onClose }: JobDetailModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 overflow-y-auto" onClick={onClose}>
-      <div className="bg-white rounded-lg max-w-2xl w-full my-8 shadow-2xl flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto" onClick={onClose}>
+      <div className="bg-white rounded-t-2xl sm:rounded-lg w-full sm:max-w-2xl sm:my-8 shadow-2xl flex flex-col max-h-[92dvh] sm:max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="bg-[#1a3a6b] text-white p-6 flex items-start justify-between rounded-t-lg sticky top-0 z-10">
           <div>
@@ -109,9 +109,9 @@ export function JobDetailModal({ job, isOpen, onClose }: JobDetailModalProps) {
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6 overflow-y-auto flex-1 text-sm">
+        <div className="p-4 sm:p-6 space-y-5 overflow-y-auto flex-1 text-sm">
           {/* Info grid */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
             <div className="bg-slate-50 border border-slate-200 p-3 rounded-lg">
               <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Total Vacancies</p>
               <p className="font-bold text-slate-800">{job.numberOfPositions.toLocaleString()} Posts</p>
@@ -187,7 +187,7 @@ export function JobDetailModal({ job, isOpen, onClose }: JobDetailModalProps) {
           {/* Eligibility At A Glance */}
           <div className="border-t border-slate-100 pt-5">
             <h3 className="text-xs font-bold text-[#1a3a6b] uppercase tracking-wider mb-3">Eligibility At A Glance</h3>
-            <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
               <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-lg">
                 <label className="text-[9px] text-slate-500 font-bold uppercase tracking-wider block mb-1">GATE Required?</label>
                 <span className={`font-bold ${job.jobType === 'GATE' ? 'text-green-700' : 'text-slate-700'}`}>
@@ -236,10 +236,10 @@ export function JobDetailModal({ job, isOpen, onClose }: JobDetailModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-200 flex gap-2 justify-end bg-slate-50 rounded-b-lg">
+        <div className="p-3 sm:p-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row gap-2 sm:justify-end bg-slate-50 rounded-b-2xl sm:rounded-b-lg">
           <button
             onClick={onClose}
-            className="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-100 font-bold transition-colors text-xs"
+            className="w-full sm:w-auto px-4 py-2.5 border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-100 font-bold transition-colors text-xs"
           >
             Close
           </button>
@@ -247,7 +247,7 @@ export function JobDetailModal({ job, isOpen, onClose }: JobDetailModalProps) {
             href={job.applicationUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-5 py-2 bg-[#e07b00] hover:bg-[#c56b00] text-white rounded-lg font-bold transition-colors text-xs uppercase"
+            className="w-full sm:w-auto text-center px-5 py-2.5 bg-[#e07b00] hover:bg-[#c56b00] text-white rounded-lg font-bold transition-colors text-xs uppercase"
           >
             Apply On Official Website →
           </a>

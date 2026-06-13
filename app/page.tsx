@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { IJob } from '@/models/Job';
-import { AdBanner } from '@/components/AdBanner';
+
 import { LottieLogo } from '@/components/LottieLogo';
 
 export default function Home() {
@@ -281,6 +281,9 @@ export default function Home() {
     return `${day} ${month} ${year}`;
   };
 
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
+
   return (
     <>
       <style>{`
@@ -528,6 +531,49 @@ export default function Home() {
         footer { background: var(--navy); color: #fff; text-align: center; padding: 20px 16px; font-size: 12px; }
         footer a { color: #a8c4e8; text-decoration: none; }
         footer a:hover { text-decoration: underline; }
+
+        /* ── HAMBURGER MENU ── */
+        .hamburger-btn { display: none; background: none; border: none; cursor: pointer; padding: 6px; border-radius: 6px; color: #fff; flex-shrink: 0; transition: background 0.2s; }
+        .hamburger-btn:hover { background: rgba(255,255,255,0.12); }
+        .hamburger-btn svg { display: block; }
+        .mobile-filter-toggle { display: none; }
+        .mobile-nav-overlay { display: none; position: fixed; inset: 0; z-index: 300; }
+        .mobile-nav-backdrop { position: absolute; inset: 0; background: rgba(10,25,55,0.55); }
+        .mobile-nav-drawer { position: absolute; top: 0; right: 0; width: min(280px, 85vw); height: 100%; background: var(--navy-dark); box-shadow: -4px 0 24px rgba(0,0,0,0.4); display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.4,0,0.2,1); }
+        .mobile-nav-overlay.open { display: block; }
+        .mobile-nav-overlay.open .mobile-nav-drawer { transform: translateX(0); }
+        .mobile-nav-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .mobile-nav-header .brand { font-family: 'Baloo 2', sans-serif; font-size: 16px; font-weight: 800; color: #fff; }
+        .mobile-nav-close { background: rgba(255,255,255,0.08); border: none; color: #fff; width: 34px; height: 34px; border-radius: 8px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+        .mobile-nav-close:hover { background: rgba(255,255,255,0.18); }
+        .mobile-nav-links { list-style: none; padding: 12px 0; flex: 1; }
+        .mobile-nav-links li a { display: flex; align-items: center; gap: 12px; padding: 13px 22px; color: #c8d8f0; text-decoration: none; font-size: 14px; font-weight: 600; transition: all 0.15s; border-left: 3px solid transparent; }
+        .mobile-nav-links li a:hover { background: rgba(255,255,255,0.07); color: #fff; border-left-color: var(--saffron); }
+        .mobile-nav-footer { padding: 16px 22px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11px; color: #5c7aa0; }
+        @media (max-width: 900px) {
+          .hdr-nav { display: none !important; }
+          .hamburger-btn { display: flex; align-items: center; margin-left: auto; }
+          
+          .wrap { padding: 14px 12px 50px; gap: 14px; grid-template-columns: 1fr; }
+          .sidebar { position: static; order: 2; }
+          .job-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+          .mbody { padding: 16px 18px; }
+          .mhdr { padding: 16px 18px 12px; }
+          .mfooter { padding: 12px 18px; }
+        }
+        @media (max-width: 640px) {
+          .hdr-top { font-size: 10px; padding: 4px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+          .hdr-main { padding: 7px 12px; gap: 8px; }
+          .logo-circle { width: 38px; height: 38px; }
+          .logo-text h1 { font-size: 16px; }
+          .logo-text p { display: none; }
+          
+          .btn-mobile-filter-toggle { display: inline-block !important; }
+          .mobile-filter-toggle { display: flex !important; }
+          .filter-row { display: none !important; }
+          .filter-row.open { display: grid !important; grid-template-columns: 1fr 1fr; gap: 6px; }
+          .job-count-desktop { display: none !important; }
+        }
       `}</style>
 
       <header>
@@ -542,6 +588,8 @@ export default function Home() {
             <h1>EngineerNaukri</h1>
             <p>Employment Portal for Engineers | इंजीनियर रोजगार पोर्टल</p>
           </div>
+
+          {/* Desktop nav — hidden on mobile */}
           <nav className="hdr-nav">
             <a href="#">Home</a>
             <a href="#">Results</a>
@@ -549,8 +597,54 @@ export default function Home() {
             <a href="#">Syllabus</a>
             <a href="#">Help</a>
           </nav>
+
+          {/* Hamburger button — shown on mobile only */}
+          <button
+            className="hamburger-btn"
+            onClick={() => setNavOpen(true)}
+            aria-label="Open menu"
+            aria-expanded={navOpen}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
         </div>
       </header>
+
+      {/* Mobile slide-in nav drawer */}
+      <div className={`mobile-nav-overlay${navOpen ? ' open' : ''}`} role="dialog" aria-modal="true">
+        {/* Backdrop */}
+        <div className="mobile-nav-backdrop" onClick={() => setNavOpen(false)} />
+        {/* Drawer */}
+        <div className="mobile-nav-drawer">
+          <div className="mobile-nav-header">
+            <span className="brand">EngineerNaukri</span>
+            <button className="mobile-nav-close" onClick={() => setNavOpen(false)} aria-label="Close menu">✕</button>
+          </div>
+          <ul className="mobile-nav-links">
+            {[
+              { icon: '🏠', label: 'Home', href: '#' },
+              { icon: '📋', label: 'Results', href: '#' },
+              { icon: '🪪', label: 'Admit Cards', href: '#' },
+              { icon: '📚', label: 'Syllabus', href: '#' },
+              { icon: '❓', label: 'Help', href: '#' },
+            ].map(({ icon, label, href }) => (
+              <li key={label}>
+                <a href={href} onClick={() => setNavOpen(false)}>
+                  <span style={{ fontSize: 18 }}>{icon}</span>
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <div className="mobile-nav-footer">
+            © 2026 EngineerNaukri · Public sector jobs for engineers
+          </div>
+        </div>
+      </div>
 
       <div className="hero">
         <div className="hero-inner">
@@ -652,12 +746,22 @@ export default function Home() {
         </div>
       </div>
 
-      {/* AdSense Top Banner */}
-      <AdBanner adSlot="1234567890" adFormat="horizontal" />
+
 
       {/* FILTER BAR */}
       <div className="filter-bar">
-        <div className="filter-row">
+        {/* Mobile: toggle row */}
+        <div style={{ gap: '8px', alignItems: 'center', marginBottom: mobileFiltersOpen ? '8px' : '0' }} className="mobile-filter-toggle">
+          <button
+            onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+            style={{ background: 'var(--navy)', color: '#fff', border: 'none', padding: '7px 14px', borderRadius: '7px', fontFamily: 'Hind, sans-serif', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
+            className="btn-mobile-filter-toggle"
+          >
+            🔍 Filters {mobileFiltersOpen ? '▲' : '▼'}
+          </button>
+          <span className="job-count-badge" style={{ marginLeft: 'auto' }}>{filteredJobs.length} jobs</span>
+        </div>
+        <div className={`filter-row ${mobileFiltersOpen ? 'open' : ''}`}>
           <select value={fGate} onChange={(e) => setFGate(e.target.value)}>
             <option value="all">All (GATE + Non-GATE)</option>
             <option value="GATE">GATE Required</option>
@@ -705,7 +809,7 @@ export default function Home() {
           <button className="btn-rst" onClick={resetFilters}>
             Reset
           </button>
-          <span className="job-count-badge">{filteredJobs.length} jobs</span>
+          <span className="job-count-badge job-count-desktop">{filteredJobs.length} jobs</span>
         </div>
       </div>
 
@@ -817,87 +921,134 @@ export default function Home() {
               <p>Try adjusting your filters.</p>
             </div>
           ) : (
-            <table className="job-table">
-              <thead>
-                <tr>
-                  <th className="td-org">Organisation</th>
-                  <th className="td-post">Post / Position</th>
-                  <th className="td-tags">Tags</th>
-                  <th className="td-salary">Salary</th>
-                  <th className="td-status">Status</th>
-                  <th className="td-deadline">Deadline</th>
-                  <th className="td-action" style={{ textAlign: 'center' }}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredJobs.map((job) => (
-                  <tr key={job._id}>
-                    <td className="td-org">
-                      <div className="org-name">{job.organization}</div>
-                      <div className="org-sub">{job.organizationFullName}</div>
-                    </td>
-                    <td className="td-post">
-                      <div className="post-name">{job.title}</div>
-                      {job.isNewJob && <span className="tag tnew">NEW</span>}
-                    </td>
-                    <td className="td-tags">
-                      <div className="tags-container">
-                        {job.jobType === 'GATE' && <span className="tag tg">GATE</span>}
-                        {job.jobType === 'NON_GATE' && <span className="tag tng">Non-GATE</span>}
-                        {job.jobType === 'MIXED' && <span className="tag tmx">Mixed</span>}
-
-                        {job.category === 'GENERAL' ? (
-                          <span className="tag tgen">Non-Engg / General</span>
-                        ) : (
-                          job.category && (
-                            <span className="tag tcat">{getCategoryLabel(job.category)}</span>
-                          )
-                        )}
-
-                        {job.eligibleBranches.map((branch) => (
-                          <span key={branch} className="tag tbr">
-                            {branch}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="td-salary">{job.salary}</td>
-                    <td className="td-status">
-                      {isJobOpen(job.deadline) ? (
-                        <span className="status-pill s-open">Open</span>
-                      ) : (
-                        <span className="status-pill s-closed">Closed</span>
-                      )}
-                    </td>
-                    <td className="td-deadline">
-                      <span className={getDeadlineClass(job.deadline.toString())}>
-                        {formatDeadlineDayMonth(job.deadline.toString())}
-                      </span>
-                    </td>
-                    <td className="td-action" style={{ whiteSpace: 'nowrap', textAlign: 'center' }}>
-                      <button className="btn-detail-outline" onClick={() => openJobDetail(job)}>
-                        Details
-                      </button>
-                      &nbsp;
-                      <a
-                        href={job.applicationUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn-apply-orange"
-                      >
-                        Apply →
-                      </a>
-                    </td>
+            <>
+              {/* ── Desktop Table ── */}
+              <table className="job-table">
+                <thead>
+                  <tr>
+                    <th className="td-org">Organisation</th>
+                    <th className="td-post">Post / Position</th>
+                    <th className="td-tags">Tags</th>
+                    <th className="td-salary">Salary</th>
+                    <th className="td-status">Status</th>
+                    <th className="td-deadline">Deadline</th>
+                    <th className="td-action" style={{ textAlign: 'center' }}>Action</th>
                   </tr>
+                </thead>
+                <tbody>
+                  {filteredJobs.map((job) => (
+                    <tr key={job._id}>
+                      <td className="td-org">
+                        <div className="org-name">{job.organization}</div>
+                        <div className="org-sub">{job.organizationFullName}</div>
+                      </td>
+                      <td className="td-post">
+                        <div className="post-name">{job.title}</div>
+                        {job.isNewJob && <span className="tag tnew">NEW</span>}
+                      </td>
+                      <td className="td-tags">
+                        <div className="tags-container">
+                          {job.jobType === 'GATE' && <span className="tag tg">GATE</span>}
+                          {job.jobType === 'NON_GATE' && <span className="tag tng">Non-GATE</span>}
+                          {job.jobType === 'MIXED' && <span className="tag tmx">Mixed</span>}
+                          {job.category === 'GENERAL' ? (
+                            <span className="tag tgen">Non-Engg / General</span>
+                          ) : (
+                            job.category && (
+                              <span className="tag tcat">{getCategoryLabel(job.category)}</span>
+                            )
+                          )}
+                          {job.eligibleBranches.map((branch) => (
+                            <span key={branch} className="tag tbr">{branch}</span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="td-salary">{job.salary}</td>
+                      <td className="td-status">
+                        {isJobOpen(job.deadline) ? (
+                          <span className="status-pill s-open">Open</span>
+                        ) : (
+                          <span className="status-pill s-closed">Closed</span>
+                        )}
+                      </td>
+                      <td className="td-deadline">
+                        <span className={getDeadlineClass(job.deadline.toString())}>
+                          {formatDeadlineDayMonth(job.deadline.toString())}
+                        </span>
+                      </td>
+                      <td className="td-action" style={{ whiteSpace: 'nowrap', textAlign: 'center' }}>
+                        <button className="btn-detail-outline" onClick={() => openJobDetail(job)}>Details</button>
+                        &nbsp;
+                        <a href={job.applicationUrl} target="_blank" rel="noopener noreferrer" className="btn-apply-orange">Apply →</a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* ── Mobile Cards (shown only on small screens via CSS) ── */}
+              <div className="mobile-job-list">
+                {filteredJobs.map((job) => (
+                  <div key={`m-${job._id}`} className="job-card-mobile">
+                    <div className="job-card-mobile-header">
+                      <div>
+                        <div className="job-card-mobile-org">{job.organization}</div>
+                        <div className="job-card-mobile-sub">{job.organizationFullName}</div>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
+                        {isJobOpen(job.deadline) ? (
+                          <span className="status-pill s-open">Open</span>
+                        ) : (
+                          <span className="status-pill s-closed">Closed</span>
+                        )}
+                        {job.isNewJob && <span className="tag tnew">NEW</span>}
+                      </div>
+                    </div>
+                    <div className="job-card-mobile-title">{job.title}</div>
+                    <div className="job-card-mobile-meta">
+                      <div className="job-card-mobile-meta-item">
+                        <label>Salary</label>
+                        <span className="val salary">{job.salary || '—'}</span>
+                      </div>
+                      <div className="job-card-mobile-meta-item">
+                        <label>Deadline</label>
+                        <span className={`val ${getDeadlineClass(job.deadline.toString())}`}>
+                          {formatDeadlineDayMonth(job.deadline.toString())}
+                        </span>
+                      </div>
+                      <div className="job-card-mobile-meta-item">
+                        <label>Positions</label>
+                        <span className="val">{job.numberOfPositions.toLocaleString()}</span>
+                      </div>
+                      <div className="job-card-mobile-meta-item">
+                        <label>Category</label>
+                        <span className="val">{getCategoryLabel(job.category)}</span>
+                      </div>
+                    </div>
+                    <div className="job-card-mobile-tags">
+                      {job.jobType === 'GATE' && <span className="tag tg">GATE</span>}
+                      {job.jobType === 'NON_GATE' && <span className="tag tng">Non-GATE</span>}
+                      {job.jobType === 'MIXED' && <span className="tag tmx">Mixed</span>}
+                      {job.eligibleBranches.slice(0, 4).map((branch) => (
+                        <span key={branch} className="tag tbr">{branch}</span>
+                      ))}
+                      {job.eligibleBranches.length > 4 && (
+                        <span className="tag tbr">+{job.eligibleBranches.length - 4}</span>
+                      )}
+                    </div>
+                    <div className="job-card-mobile-actions">
+                      <button className="btn-detail-outline" onClick={() => openJobDetail(job)}>Details</button>
+                      <a href={job.applicationUrl} target="_blank" rel="noopener noreferrer" className="btn-apply-orange">Apply →</a>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </>
           )}
         </div>
       </div>
 
-      {/* AdSense Bottom Banner */}
-      <AdBanner adSlot="9876543210" adFormat="auto" />
+
 
       {/* JOB DETAIL MODAL */}
       {selectedJob && (

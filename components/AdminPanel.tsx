@@ -247,8 +247,8 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
         {activeTab === 'jobs' && (
           <div>
             {/* Actions Bar */}
-            <div className="mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
-              <div className="flex-1 w-full">
+            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="w-full sm:flex-1">
                 <input
                   type="text"
                   value={searchTerm}
@@ -263,7 +263,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                   setSelectedJob(null);
                   setIsFormOpen(true);
                 }}
-                className="rounded-md font-bold text-sm text-white whitespace-nowrap transition-all duration-150 hover:opacity-90 active:scale-95 shadow-md"
+                className="w-full sm:w-auto rounded-md font-bold text-sm text-white whitespace-nowrap transition-all duration-150 hover:opacity-90 active:scale-95 shadow-md"
                 style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5a8e 100%)', boxShadow: '0 3px 12px rgba(30,58,95,0.4)', letterSpacing: '0.2px', minWidth: 150, padding: '10px 28px' }}
               >
                 ＋ Add New Job
@@ -308,8 +308,8 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                 )}
               </div>
             ) : (
-              <div className="w-full max-w-full overflow-x-auto bg-white rounded-lg border border-border shadow-sm">
-                <table className="w-full border-collapse">
+              <div className="w-full max-w-full overflow-x-auto bg-white rounded-lg border border-border shadow-sm" style={{ WebkitOverflowScrolling: 'touch' }}>
+                <table className="w-full border-collapse" style={{ minWidth: 700 }}>
                   <thead className="bg-slate-50 border-b border-border">
                     <tr>
                       <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Title</th>

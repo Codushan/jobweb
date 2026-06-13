@@ -1385,6 +1385,7 @@ footer a:hover {
 
   .sidebar {
     position: static;
+    order: 2; /* push sidebar below jobs on tablet */
   }
 
   .igrid {
@@ -1394,16 +1395,90 @@ footer a:hover {
   .job-table {
     display: block;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .hdr-nav {
     display: none;
   }
+
+  /* Modal: comfortable padding on tablet */
+  .mbody {
+    padding: 16px 18px;
+  }
+
+  .mhdr {
+    padding: 16px 18px 12px;
+  }
+
+  .mfooter {
+    padding: 12px 18px;
+  }
+
+  .m-info-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
 }
 
-@media (max-width: 600px) {
+/* ── MOBILE (≤ 640px) ── */
+@media (max-width: 640px) {
+
+  /* Header */
+  .hdr-top {
+    font-size: 10px;
+    padding: 4px 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hdr-main {
+    padding: 7px 12px;
+    gap: 8px;
+  }
+
+  .logo-circle {
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+  }
+
+  .logo-text h1 {
+    font-size: 16px;
+  }
+
+  .logo-text p {
+    font-size: 9px;
+    display: none; /* hide Hindi subtitle on very small screens */
+  }
+
+  /* Hero */
+  .hero {
+    padding: 20px 12px 16px;
+  }
+
   .hero h2 {
-    font-size: 22px;
+    font-size: 20px;
+    line-height: 1.25;
+  }
+
+  .hero p {
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+
+  .hero-badge {
+    font-size: 10px;
+    padding: 3px 10px;
+    margin-bottom: 8px;
+  }
+
+  .hero-ticker {
+    border-radius: 12px !important;
+    padding: 7px 12px !important;
+    margin-bottom: 14px !important;
+    gap: 8px !important;
   }
 
   .hero-stats {
@@ -1411,18 +1486,332 @@ footer a:hover {
   }
 
   .hero-stat .num {
-    font-size: 20px;
+    font-size: 22px;
+  }
+
+  .hero-stat .lbl {
+    font-size: 10px;
+  }
+
+  /* Filter bar: collapse to 2-col grid on mobile */
+  .filter-bar {
+    top: 68px; /* smaller header height on mobile */
+    padding: 8px 12px;
   }
 
   .filter-row {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    align-items: center;
   }
 
-  .filter-row select,
-  .filter-row input,
-  .btn-go,
-  .btn-rst {
+  .filter-row select {
+    min-width: 0;
     width: 100%;
+    font-size: 12px;
+    height: 36px;
+    padding: 0 8px;
+  }
+
+  .filter-row input[type='text'] {
+    grid-column: 1 / -1; /* full width search */
+    min-width: 0;
+    width: 100%;
+    height: 36px;
+  }
+
+  .btn-go {
+    height: 36px;
+    font-size: 12px;
+    padding: 0 10px;
+  }
+
+  .btn-rst {
+    height: 36px;
+    font-size: 12px;
+    padding: 0 8px;
+  }
+
+  .job-count-badge {
+    grid-column: 1 / -1;
+    text-align: center;
+  }
+
+  /* Main layout: single column, sidebar goes below */
+  .wrap {
+    padding: 14px 12px 50px;
+    gap: 14px;
+  }
+
+  /* Jobs header */
+  .jobs-hdr {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .jobs-hdr h2 {
+    font-size: 16px;
+  }
+
+  /* Job table: swap to card layout on mobile */
+  .job-table {
+    display: none !important; /* hide table; mobile cards shown via JS className */
+  }
+
+  /* Mobile job cards */
+  .job-card-mobile {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow);
+  }
+
+  .job-card-mobile-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .job-card-mobile-org {
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  .job-card-mobile-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  .job-card-mobile-title {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .job-card-mobile-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 8px;
+    font-size: 11px;
+  }
+
+  .job-card-mobile-meta-item label {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    display: block;
+  }
+
+  .job-card-mobile-meta-item .val {
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .job-card-mobile-meta-item .val.salary {
+    color: var(--green);
+  }
+
+  .job-card-mobile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+
+  .job-card-mobile-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .job-card-mobile-actions .btn-detail-outline {
+    flex: 1;
+    text-align: center;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .job-card-mobile-actions .btn-apply-orange {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  /* Sidebar on mobile */
+  .sidebar {
+    display: none; /* hide sidebar by default on mobile to reduce clutter */
+  }
+
+  /* Modal: full-screen on mobile */
+  .overlay {
+    padding: 0;
+    align-items: flex-end; /* slide up from bottom */
+  }
+
+  .modal {
+    border-radius: 16px 16px 0 0;
+    max-height: 92dvh;
+    max-height: 92vh; /* fallback */
+    width: 100%;
+    max-width: 100%;
+    transform: translateY(100%);
+  }
+
+  .overlay.on .modal {
+    transform: translateY(0);
+  }
+
+  .mhdr {
+    padding: 14px 16px 10px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .morg {
+    font-size: 10px;
+  }
+
+  .mtitle {
+    font-size: 17px;
+    margin-bottom: 6px;
+  }
+
+  .mbody {
+    padding: 14px 16px;
+  }
+
+  .m-info-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .m-info-box {
+    padding: 8px 10px;
+  }
+
+  .m-info-box .val {
+    font-size: 12px;
+  }
+
+  .elig-glance-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .mfooter {
+    padding: 10px 16px;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-apbig {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 20px;
+    font-size: 13px;
+  }
+
+  .btn-closem {
+    width: 100%;
+    text-align: center;
+    padding: 10px 18px;
+  }
+
+  /* Footer */
+  footer {
+    padding: 16px 12px;
+    font-size: 11px;
+  }
+
+  /* Admin panel table: horizontal scroll on mobile */
+  .min-h-screen.bg-slate-50 .w-full.max-w-full {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-tabs-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    gap: 0;
+  }
+
+  .admin-tab-btn {
+    padding: 10px 16px;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+}
+
+/* Mobile job list: hidden on desktop, visible on mobile */
+.mobile-job-list {
+  display: none;
+}
+
+/* Mobile filter toggle button: hidden on desktop */
+.btn-mobile-filter-toggle {
+  display: none !important;
+}
+
+/* Mobile-only count badge in toggle row: hidden on desktop */
+.mobile-filter-toggle {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  /* Show mobile cards, hide desktop table */
+  .mobile-job-list {
+    display: block;
+  }
+
+  /* Show mobile filter toggle row */
+  .mobile-filter-toggle {
+    display: flex;
+  }
+
+  /* Hide the duplicate count badge inside filter-row on mobile */
+  .job-count-desktop {
+    display: none;
+  }
+}
+
+
+/* ── VERY SMALL (≤ 360px) ── */
+@media (max-width: 360px) {
+  .hero h2 {
+    font-size: 18px;
+  }
+
+  .filter-row {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-row select {
+    grid-column: auto;
+  }
+
+  .job-count-badge {
+    grid-column: auto;
+  }
+
+  .m-info-grid,
+  .elig-glance-grid {
+    grid-template-columns: 1fr;
   }
 }
 

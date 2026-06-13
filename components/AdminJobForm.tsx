@@ -589,11 +589,11 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-center items-center gap-4 pt-6 border-t border-border">
+      <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-6 border-t border-border">
         <button
           type="submit"
           disabled={isLoading}
-          className="rounded-md font-bold text-sm text-white transition-all duration-150 hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+          className="w-full sm:w-auto rounded-md font-bold text-sm text-white transition-all duration-150 hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
           style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5a8e 50%, #1e3a5f 100%)', boxShadow: '0 4px 14px rgba(30,58,95,0.45)', letterSpacing: '0.3px', minWidth: 160, padding: '12px 40px' }}
         >
           <span className="flex items-center justify-center gap-2">
@@ -611,7 +611,7 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
           type="button"
           onClick={onCancel}
           disabled={isLoading}
-          className="rounded-md font-bold text-sm transition-all duration-150 hover:opacity-80 active:scale-95 disabled:opacity-50 border-2"
+          className="w-full sm:w-auto rounded-md font-bold text-sm transition-all duration-150 hover:opacity-80 active:scale-95 disabled:opacity-50 border-2"
           style={{ background: 'transparent', borderColor: '#cbd5e1', color: '#64748b', minWidth: 140, padding: '12px 40px' }}
           onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#f1f5f9'; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}

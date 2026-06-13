@@ -1,11 +1,17 @@
 import { Analytics } from '@vercel/analytics/next'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Baloo_2, Hind } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
 
 const baloo = Baloo_2({ variable: '--font-baloo', subsets: ['latin'] })
 const hind = Hind({ variable: '--font-hind', weight: ['400', '600', '700'], subsets: ['latin'] })
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+}
 
 export const metadata: Metadata = {
   title: 'EngineerNaukri – PSU & Govt Engineering Jobs Portal | GATE & Non-GATE',
@@ -48,14 +54,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${baloo.variable} ${hind.variable} bg-background`}>
       <head>
-        {/* Google AdSense Script — must be a plain <script> tag, not Next.js <Script>, to avoid data-nscript warning */}
-        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
-          crossOrigin="anonymous"
-        />
-
         {/* Google Analytics GA4 */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-LVGCNRXSHX"
