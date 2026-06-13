@@ -54,6 +54,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${baloo.variable} ${hind.variable} bg-background`}>
       <head>
+        <meta name="google-adsense-account" content="ca-pub-5720256578139439" />
         {/* Google Analytics GA4 */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-LVGCNRXSHX"
