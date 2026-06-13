@@ -192,7 +192,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
       `}</style>
       {/* Header */}
       <header className="bg-white border-b border-border sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
               <span className="text-white text-lg font-bold">⚙️</span>
@@ -205,7 +205,8 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
 
           <button
             onClick={onLogout}
-            className="px-6 py-2 bg-destructive text-white rounded-lg font-semibold hover:bg-destructive/90 transition-colors text-sm"
+            className="bg-destructive text-white rounded-lg font-semibold hover:bg-destructive/90 transition-colors text-sm"
+            style={{ padding: '10px 24px' }}
           >
             Logout
           </button>
@@ -213,7 +214,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
       </header>
 
       {/* Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-4 py-12">
         {error && (
           <div className="mb-6 p-4 bg-destructive/10 border border-destructive text-destructive rounded-lg flex justify-between items-center text-sm">
             <span>{error}</span>
@@ -262,9 +263,10 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                   setSelectedJob(null);
                   setIsFormOpen(true);
                 }}
-                className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-bold hover:bg-primary/90 transition-colors text-sm whitespace-nowrap"
+                className="rounded-md font-bold text-sm text-white whitespace-nowrap transition-all duration-150 hover:opacity-90 active:scale-95 shadow-md"
+                style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5a8e 100%)', boxShadow: '0 3px 12px rgba(30,58,95,0.4)', letterSpacing: '0.2px', minWidth: 150, padding: '10px 28px' }}
               >
-                + Add New Job
+                ＋ Add New Job
               </button>
             </div>
 
@@ -298,9 +300,10 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                       setSelectedJob(null);
                       setIsFormOpen(true);
                     }}
-                    className="mt-4 px-6 py-2 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors text-sm"
+                    className="mt-4 rounded-md font-bold text-sm text-white transition-all duration-150 hover:opacity-90 active:scale-95 shadow-md"
+                    style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5a8e 100%)', boxShadow: '0 3px 12px rgba(30,58,95,0.4)', padding: '10px 32px' }}
                   >
-                    Create First Job
+                    ＋ Create First Job
                   </button>
                 )}
               </div>
@@ -369,15 +372,17 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                                 setSelectedJob(job);
                                 setIsFormOpen(true);
                               }}
-                              className="px-3 py-1 bg-primary text-primary-foreground rounded text-xs font-semibold hover:bg-primary/90 transition-colors"
+                              className="rounded-md text-xs font-bold text-white transition-all duration-150 hover:opacity-90 active:scale-95"
+                              style={{ background: 'linear-gradient(135deg, #2563eb, #3b82f6)', boxShadow: '0 2px 6px rgba(37,99,235,0.35)', minWidth: 56, padding: '7px 14px' }}
                             >
-                              Edit
+                              ✏️ Edit
                             </button>
                             <button
                               onClick={() => job._id && handleDeleteJob(job._id)}
-                              className="px-3 py-1 bg-destructive text-white rounded text-xs font-semibold hover:bg-destructive/90 transition-colors"
+                              className="rounded-md text-xs font-bold text-white transition-all duration-150 hover:opacity-90 active:scale-95"
+                              style={{ background: 'linear-gradient(135deg, #dc2626, #ef4444)', boxShadow: '0 2px 6px rgba(220,38,38,0.35)', minWidth: 64, padding: '7px 14px' }}
                             >
-                              Delete
+                              🗑️ Delete
                             </button>
                           </div>
                         </td>
@@ -409,10 +414,11 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
               />
               <button
                 type="submit"
-                className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-bold hover:bg-primary/90 transition-colors text-sm whitespace-nowrap"
+                className="rounded-md font-bold text-sm text-white whitespace-nowrap transition-all duration-150 hover:opacity-90 active:scale-95 shadow-md"
+                style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5a8e 100%)', boxShadow: '0 3px 12px rgba(30,58,95,0.4)', minWidth: 160, padding: '10px 28px' }}
                 disabled={isNotifLoading}
               >
-                + Add Ticker Info
+                ＋ Add Ticker Info
               </button>
             </form>
 
@@ -433,9 +439,10 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                     <span className="font-semibold text-slate-800">{notif.text}</span>
                     <button
                       onClick={() => handleDeleteNotification(notif._id)}
-                      className="px-3 py-1 bg-destructive text-white rounded text-xs font-semibold hover:bg-destructive/90 transition-colors"
+                      className="rounded-md text-xs font-bold text-white transition-all duration-150 hover:opacity-90 active:scale-95 flex-shrink-0"
+                      style={{ background: 'linear-gradient(135deg, #dc2626, #ef4444)', boxShadow: '0 2px 6px rgba(220,38,38,0.3)', padding: '7px 14px' }}
                     >
-                      Delete
+                      🗑️ Delete
                     </button>
                   </div>
                 ))}

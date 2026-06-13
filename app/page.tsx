@@ -8,7 +8,7 @@ import { LottieLogo } from '@/components/LottieLogo';
 export default function Home() {
   const [jobs, setJobs] = useState<IJob[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<IJob[]>([]);
-  const [notifications, setNotifications] = useState<{ text: string }[]>([]);
+  const [notifications, setNotifications] = useState<{ text: string; _id?: string; updatedAt?: string; createdAt?: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<IJob | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);

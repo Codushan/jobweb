@@ -1,7 +1,7 @@
 'use client';
 
 import { IJob } from '@/models/Job';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface AdminJobFormProps {
   job?: IJob | null;
@@ -9,16 +9,7 @@ interface AdminJobFormProps {
   onCancel: () => void;
 }
 
-const BRANCHES = [
-  'CSE',
-  'ECE',
-  'ME',
-  'CIVIL',
-  'CHEMICAL',
-  'PRODUCTION',
-  'METALLURGY',
-  'MINING',
-];
+const BRANCHES = ['CSE', 'ECE', 'ME', 'CIVIL', 'CHEMICAL', 'PRODUCTION', 'METALLURGY', 'MINING'];
 
 export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
   const [formData, setFormData] = useState<IJob>({
@@ -49,13 +40,20 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
   const [notesText, setNotesText] = useState(
     job?.importantNotes ? job.importantNotes.join('\n') : ''
   );
-
   const [timeline, setTimeline] = useState<any[]>(job?.timeline || []);
   const [newEvent, setNewEvent] = useState({ event: '', date: '', description: '', status: 'UPCOMING' });
-
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [newEligibility, setNewEligibility] = useState('');
+
+  // Date validation state
+  const [deadlineRaw, setDeadlineRaw] = useState(
+    job?.deadline ? new Date(job.deadline).toISOString().split('T')[0] : ''
+  );
+  const [deadlineError, setDeadlineError] = useState('');
+
+  // Field-level validation errors
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -63,6 +61,40 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
       ...prev,
       [name]: name === 'numberOfPositions' ? parseInt(value) || 0 : value,
     }));
+    // Clear field error on change
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => { const n = { ...prev }; delete n[name]; return n; });
+    }
+  };
+
+  const handleDeadlineChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDeadlineRaw(e.target.value);
+    setDeadlineError('');
+  };
+
+  const handleDeadlineBlur = () => {
+    if (!deadlineRaw) {
+      setDeadlineError('Deadline is required.');
+      return;
+    }
+    const parsed = new Date(deadlineRaw);
+    if (isNaN(parsed.getTime())) {
+      setDeadlineError('Invalid date. Please enter a valid date (YYYY-MM-DD).');
+      return;
+    }
+    setDeadlineError('');
+    setFormData((prev) => ({ ...prev, deadline: parsed }));
+  };
+
+  const handleSelectAllBranches = () => {
+    const allSelected = BRANCHES.every((b) => formData.eligibleBranches.includes(b));
+    setFormData((prev) => ({
+      ...prev,
+      eligibleBranches: allSelected ? [] : [...BRANCHES],
+    }));
+    if (fieldErrors.eligibleBranches) {
+      setFieldErrors((prev) => { const n = { ...prev }; delete n.eligibleBranches; return n; });
+    }
   };
 
   const handleBranchToggle = (branch: string) => {
@@ -72,23 +104,23 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
         ? prev.eligibleBranches.filter((b) => b !== branch)
         : [...prev.eligibleBranches, branch],
     }));
+    if (fieldErrors.eligibleBranches) {
+      setFieldErrors((prev) => { const n = { ...prev }; delete n.eligibleBranches; return n; });
+    }
   };
 
   const addEligibility = () => {
     if (newEligibility.trim()) {
-      setFormData((prev) => ({
-        ...prev,
-        eligibility: [...prev.eligibility, newEligibility.trim()],
-      }));
+      setFormData((prev) => ({ ...prev, eligibility: [...prev.eligibility, newEligibility.trim()] }));
       setNewEligibility('');
+      if (fieldErrors.eligibility) {
+        setFieldErrors((prev) => { const n = { ...prev }; delete n.eligibility; return n; });
+      }
     }
   };
 
   const removeEligibility = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      eligibility: prev.eligibility.filter((_, i) => i !== index),
-    }));
+    setFormData((prev) => ({ ...prev, eligibility: prev.eligibility.filter((_, i) => i !== index) }));
   };
 
   const addTimelineEvent = () => {
@@ -105,49 +137,36 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validate required fields (only title, organization, organizationFullName)
+    const errors: Record<string, string> = {};
+    if (!formData.title.trim()) errors.title = 'Job Title is required.';
+    if (!formData.organization.trim()) errors.organization = 'Org Abbreviation is required.';
+    if (!formData.organizationFullName.trim()) errors.organizationFullName = 'Organization Full Name is required.';
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setError('Please fill in all required fields (marked with *).');
+      return;
+    }
+
     setIsLoading(true);
-
     try {
-      if (!formData.title || !formData.organization || !formData.organizationFullName || !formData.applicationUrl) {
-        setError('Please fill all required fields');
-        setIsLoading(false);
-        return;
-      }
-
-      if (formData.eligibleBranches.length === 0) {
-        setError('Please select at least one eligible branch');
-        setIsLoading(false);
-        return;
-      }
-
-      if (formData.eligibility.length === 0) {
-        setError('Please add at least one eligibility criterion');
-        setIsLoading(false);
-        return;
-      }
-
-      const notes = notesText
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean);
-
+      const notes = notesText.split('\n').map((l) => l.trim()).filter(Boolean);
+      const dl = new Date(deadlineRaw);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const dl = new Date(formData.deadline);
       dl.setHours(0, 0, 0, 0);
       const computedStatus = today.getTime() <= dl.getTime() ? 'OPEN' : 'CLOSED';
 
       const finalJobData: IJob = {
         ...formData,
+        deadline: dl,
         status: computedStatus,
         importantNotes: notes,
-        timeline: timeline,
+        timeline,
       };
-
-      if (job?._id) {
-        finalJobData._id = job._id;
-      }
-
+      if (job?._id) finalJobData._id = job._id;
       await onSubmit(finalJobData);
     } catch (err: any) {
       setError(err.message || 'Error saving job');
@@ -156,60 +175,87 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
     }
   };
 
+  const allBranchesSelected = BRANCHES.every((b) => formData.eligibleBranches.includes(b));
+
+  const fieldClass = (name: string) =>
+    `w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 text-sm transition-colors ${
+      fieldErrors[name]
+        ? 'border-red-400 focus:ring-red-400 bg-red-50'
+        : 'border-border focus:ring-primary'
+    }`;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg border border-border">
+      {/* Global error banner */}
       {error && (
-        <div className="p-4 bg-destructive/10 border border-destructive text-destructive rounded-lg text-sm">
-          {error}
+        <div className="p-4 bg-destructive/10 border border-destructive text-destructive rounded-lg text-sm flex items-start gap-2">
+          <span className="text-lg leading-none">⚠️</span>
+          <span>{error}</span>
         </div>
       )}
+
+      {/* Required note */}
+      <p className="text-xs text-muted-foreground">
+        Fields marked with <span className="text-red-500 font-bold">*</span> are required.
+      </p>
 
       {/* Basic Info */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-semibold text-primary mb-2">Job Title *</label>
+          <label className="block text-sm font-semibold text-primary mb-2">
+            Job Title <span className="text-red-500">*</span>
+          </label>
           <input
             type="text"
             name="title"
             value={formData.title}
             onChange={handleInputChange}
             placeholder="e.g., Junior Engineer (JE)"
-            className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+            className={fieldClass('title')}
             disabled={isLoading}
           />
+          {fieldErrors.title && <p className="text-red-500 text-xs mt-1">{fieldErrors.title}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-primary mb-2">Org Abbreviation *</label>
+          <label className="block text-sm font-semibold text-primary mb-2">
+            Org Abbreviation <span className="text-red-500">*</span>
+          </label>
           <input
             type="text"
             name="organization"
             value={formData.organization}
             onChange={handleInputChange}
             placeholder="e.g., BHEL"
-            className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+            className={fieldClass('organization')}
             disabled={isLoading}
           />
+          {fieldErrors.organization && <p className="text-red-500 text-xs mt-1">{fieldErrors.organization}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-primary mb-2">Organization Full Name *</label>
+          <label className="block text-sm font-semibold text-primary mb-2">
+            Organization Full Name <span className="text-red-500">*</span>
+          </label>
           <input
             type="text"
             name="organizationFullName"
             value={formData.organizationFullName}
             onChange={handleInputChange}
             placeholder="e.g., Bharat Heavy Electricals Ltd"
-            className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+            className={fieldClass('organizationFullName')}
             disabled={isLoading}
           />
+          {fieldErrors.organizationFullName && <p className="text-red-500 text-xs mt-1">{fieldErrors.organizationFullName}</p>}
         </div>
       </div>
 
       {/* Job Category, Type & Status */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-semibold text-primary mb-2">Job Category *</label>
+          <label className="block text-sm font-semibold text-primary mb-2">
+            Job Category <span className="text-red-500">*</span>
+          </label>
           <select
             name="category"
             value={formData.category}
@@ -222,6 +268,7 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
             <option value="DEFENCE">Defence / DRDO / ISRO</option>
             <option value="RAILWAY">Railway</option>
             <option value="STATE">State Govt</option>
+            <option value="GENERAL">General</option>
           </select>
         </div>
 
@@ -243,7 +290,9 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
         <div>
           <label className="block text-sm font-semibold text-primary mb-2">Status</label>
           <div className="w-full px-4 py-2 bg-slate-50 border border-border rounded-lg text-sm font-semibold text-slate-700">
-            {formData.deadline && new Date(formData.deadline).setHours(0, 0, 0, 0) >= new Date().setHours(0, 0, 0, 0) ? '🟢 Applications Open' : '🔴 Closed'}
+            {deadlineRaw && !deadlineError && new Date(deadlineRaw).setHours(0,0,0,0) >= new Date().setHours(0,0,0,0)
+              ? '🟢 Applications Open'
+              : '🔴 Closed'}
             <span className="text-[10px] font-normal text-muted-foreground block mt-1">(Auto-computed from deadline)</span>
           </div>
         </div>
@@ -291,152 +340,110 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
         </div>
       </div>
 
-      {/* Detailed Parameters (Qual, Min Marks, Selection, Bond) */}
+      {/* Qual, Min Marks, Selection, Bond */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
           <label className="block text-sm font-semibold text-primary mb-2">Qualification</label>
-          <input
-            type="text"
-            name="qualification"
-            value={formData.qualification}
-            onChange={handleInputChange}
+          <input type="text" name="qualification" value={formData.qualification} onChange={handleInputChange}
             placeholder="e.g. B.Tech / BE"
             className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-            disabled={isLoading}
-          />
+            disabled={isLoading} />
         </div>
-
         <div>
           <label className="block text-sm font-semibold text-primary mb-2">Minimum Marks</label>
-          <input
-            type="text"
-            name="minMarks"
-            value={formData.minMarks}
-            onChange={handleInputChange}
+          <input type="text" name="minMarks" value={formData.minMarks} onChange={handleInputChange}
             placeholder="e.g. 60% aggregate"
             className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-            disabled={isLoading}
-          />
+            disabled={isLoading} />
         </div>
-
         <div>
           <label className="block text-sm font-semibold text-primary mb-2">Selection Process</label>
-          <input
-            type="text"
-            name="selectionProcess"
-            value={formData.selectionProcess}
-            onChange={handleInputChange}
+          <input type="text" name="selectionProcess" value={formData.selectionProcess} onChange={handleInputChange}
             placeholder="e.g. GATE Score -> Interview"
             className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-            disabled={isLoading}
-          />
+            disabled={isLoading} />
         </div>
-
         <div>
           <label className="block text-sm font-semibold text-primary mb-2">Bond Details</label>
-          <input
-            type="text"
-            name="bond"
-            value={formData.bond}
-            onChange={handleInputChange}
+          <input type="text" name="bond" value={formData.bond} onChange={handleInputChange}
             placeholder="e.g. No bond"
             className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-            disabled={isLoading}
-          />
+            disabled={isLoading} />
         </div>
       </div>
 
-      {/* Deadline */}
+      {/* Deadline — validate on blur, no crash */}
       <div>
-        <label className="block text-sm font-semibold text-primary mb-2">Deadline</label>
+        <label className="block text-sm font-semibold text-primary mb-2">
+          Deadline
+        </label>
         <input
           type="date"
-          name="deadline"
-          value={formData.deadline ? new Date(formData.deadline).toISOString().split('T')[0] : ''}
-          onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              deadline: new Date(e.target.value),
-            }))
-          }
-          className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+          value={deadlineRaw}
+          onChange={handleDeadlineChange}
+          onBlur={handleDeadlineBlur}
+          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 text-sm transition-colors ${
+            deadlineError ? 'border-red-400 focus:ring-red-400 bg-red-50' : 'border-border focus:ring-primary'
+          }`}
           disabled={isLoading}
         />
+        {deadlineError && (
+          <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+            <span>⚠️</span> {deadlineError}
+          </p>
+        )}
       </div>
 
-      {/* Checkboxes: isNewJob, openToNonEngineering, eligibilityFinalYear */}
+      {/* Checkboxes */}
       <div className="flex flex-col md:flex-row gap-6 bg-muted/40 p-4 rounded-lg">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={formData.isNewJob}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                isNewJob: e.target.checked,
-              }))
-            }
-            className="w-4 h-4 rounded border-border"
-            disabled={isLoading}
-          />
-          <span className="text-sm font-semibold text-primary">Mark as "NEW" Job</span>
-        </label>
-
-          <label className="flex items-center gap-2 cursor-pointer">
+        {[
+          { key: 'isNewJob', label: 'Mark as "NEW" Job' },
+          { key: 'showPhases', label: 'Show Recruitment Phases' },
+          { key: 'openToNonEngineering', label: 'Open to Non-Engineers' },
+          { key: 'eligibilityFinalYear', label: 'Final Year Students Eligible' },
+        ].map(({ key, label }) => (
+          <label key={key} className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
-              checked={formData.showPhases}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  showPhases: e.target.checked,
-                }))
-              }
+              checked={!!(formData as any)[key]}
+              onChange={(e) => setFormData((prev) => ({ ...prev, [key]: e.target.checked }))}
               className="w-4 h-4 rounded border-border"
               disabled={isLoading}
             />
-            <span className="text-sm font-semibold text-primary">Show Recruitment Phases</span>
+            <span className="text-sm font-semibold text-primary">{label}</span>
           </label>
-
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={formData.openToNonEngineering}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                openToNonEngineering: e.target.checked,
-              }))
-            }
-            className="w-4 h-4 rounded border-border"
-            disabled={isLoading}
-          />
-          <span className="text-sm font-semibold text-primary">Open to Non-Engineers</span>
-        </label>
-
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={formData.eligibilityFinalYear}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                eligibilityFinalYear: e.target.checked,
-              }))
-            }
-            className="w-4 h-4 rounded border-border"
-            disabled={isLoading}
-          />
-          <span className="text-sm font-semibold text-primary">Final Year Students Eligible</span>
-        </label>
+        ))}
       </div>
 
-      {/* Eligible Branches */}
+      {/* Eligible Branches with Select All */}
       <div>
-        <label className="block text-sm font-semibold text-primary mb-3">Eligible Branches *</label>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="flex items-center gap-3 mb-3">
+          <label className="text-sm font-semibold text-primary">
+            Eligible Branches
+          </label>
+          <button
+            type="button"
+            onClick={handleSelectAllBranches}
+            className={`text-xs px-3 py-1 rounded-full font-semibold border transition-all ${
+              allBranchesSelected
+                ? 'bg-primary text-white border-primary'
+                : 'bg-white text-primary border-primary hover:bg-primary/10'
+            }`}
+            disabled={isLoading}
+          >
+            {allBranchesSelected ? '✓ All Selected' : 'Select All'}
+          </button>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 rounded-lg border border-border">
           {BRANCHES.map((branch) => (
-            <label key={branch} className="flex items-center gap-2 cursor-pointer">
+            <label
+              key={branch}
+              className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg border transition-all text-sm font-medium ${
+                formData.eligibleBranches.includes(branch)
+                  ? 'bg-primary/10 border-primary text-primary'
+                  : 'bg-white border-border text-foreground hover:border-primary/50'
+              }`}
+            >
               <input
                 type="checkbox"
                 checked={formData.eligibleBranches.includes(branch)}
@@ -444,36 +451,31 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
                 className="w-4 h-4 rounded border-border"
                 disabled={isLoading}
               />
-              <span className="text-sm">{branch}</span>
+              {branch}
             </label>
           ))}
         </div>
       </div>
 
-      {/* Eligibility Criteria (Simple List) */}
+      {/* Eligibility Criteria */}
       <div>
-        <label className="block text-sm font-semibold text-primary mb-3">Eligibility Criteria *</label>
+        <label className="block text-sm font-semibold text-primary mb-3">
+          Eligibility Criteria
+        </label>
         <div className="flex gap-2 mb-3">
           <input
             type="text"
             value={newEligibility}
             onChange={(e) => setNewEligibility(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                addEligibility();
-              }
-            }}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addEligibility(); } }}
             placeholder="e.g. BE/B.Tech in Mechanical or Electrical"
             className="flex-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
             disabled={isLoading}
           />
-          <button
-            type="button"
-            onClick={addEligibility}
-            className="px-4 py-2 bg-secondary text-white rounded-lg font-semibold hover:bg-secondary/90 transition-colors text-sm"
-            disabled={isLoading}
-          >
+          <button type="button" onClick={addEligibility}
+            className="px-6 py-2 rounded-md font-semibold text-sm text-white transition-all duration-150 hover:opacity-90 active:scale-95 shadow-sm"
+            style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)', boxShadow: '0 2px 8px rgba(99,102,241,0.4)', minWidth: 80 }}
+            disabled={isLoading}>
             Add
           </button>
         </div>
@@ -483,70 +485,45 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
             {formData.eligibility.map((criterion, index) => (
               <div key={index} className="flex items-center justify-between bg-muted/60 p-2.5 rounded-lg text-sm">
                 <span>{criterion}</span>
-                <button
-                  type="button"
-                  onClick={() => removeEligibility(index)}
-                  className="text-destructive hover:text-destructive/80 font-bold"
-                  disabled={isLoading}
-                >
-                  ✕
-                </button>
+                <button type="button" onClick={() => removeEligibility(index)}
+                  className="text-destructive hover:text-destructive/80 font-bold" disabled={isLoading}>✕</button>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* Recruitment Timeline Editor */}
+      {/* Recruitment Timeline */}
       <div>
         <label className="block text-sm font-semibold text-primary mb-3">Recruitment Timeline</label>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mb-3">
-          <input
-            type="text"
-            placeholder="Event (e.g. Written Exam)"
-            value={newEvent.event}
+          <input type="text" placeholder="Event (e.g. Written Exam)" value={newEvent.event}
             onChange={(e) => setNewEvent((prev) => ({ ...prev, event: e.target.value }))}
             className="px-3 py-1.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            disabled={isLoading}
-          />
-          <input
-            type="text"
-            placeholder="Date (e.g. Aug 2026)"
-            value={newEvent.date}
+            disabled={isLoading} />
+          <input type="text" placeholder="Date (e.g. Aug 2026)" value={newEvent.date}
             onChange={(e) => setNewEvent((prev) => ({ ...prev, date: e.target.value }))}
             className="px-3 py-1.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            disabled={isLoading}
-          />
-          <input
-            type="text"
-            placeholder="Description (optional)"
-            value={newEvent.description}
+            disabled={isLoading} />
+          <input type="text" placeholder="Description (optional)" value={newEvent.description}
             onChange={(e) => setNewEvent((prev) => ({ ...prev, description: e.target.value }))}
             className="px-3 py-1.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            disabled={isLoading}
-          />
+            disabled={isLoading} />
           <div className="flex gap-2">
-            <select
-              value={newEvent.status}
+            <select value={newEvent.status}
               onChange={(e) => setNewEvent((prev) => ({ ...prev, status: e.target.value }))}
               className="px-3 py-1.5 border border-border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary flex-1"
-              disabled={isLoading}
-            >
+              disabled={isLoading}>
               <option value="COMPLETED">Completed</option>
               <option value="ACTIVE">Active</option>
               <option value="UPCOMING">Upcoming</option>
             </select>
-            <button
-              type="button"
-              onClick={addTimelineEvent}
-              className="px-4 py-1.5 bg-secondary text-white rounded-lg font-semibold hover:bg-secondary/90 transition-colors text-sm"
-              disabled={isLoading}
-            >
-              Add
-            </button>
+            <button type="button" onClick={addTimelineEvent}
+              className="px-6 py-1.5 rounded-md font-semibold text-sm text-white transition-all duration-150 hover:opacity-90 active:scale-95"
+              style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)', boxShadow: '0 2px 8px rgba(99,102,241,0.35)', minWidth: 80 }}
+              disabled={isLoading}>Add</button>
           </div>
         </div>
-
         {timeline.length > 0 && (
           <div className="space-y-2 mb-4 max-h-48 overflow-y-auto">
             {timeline.map((evt, idx) => (
@@ -557,17 +534,10 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
                   <span className={`text-[10px] px-2 py-0.5 rounded ml-2 font-bold ${
                     evt.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
                     evt.status === 'ACTIVE' ? 'bg-orange-100 text-orange-700' :
-                    'bg-gray-100 text-gray-700'
-                  }`}>{evt.status}</span>
+                    'bg-gray-100 text-gray-700'}`}>{evt.status}</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => removeTimelineEvent(idx)}
-                  className="text-destructive font-bold"
-                  disabled={isLoading}
-                >
-                  ✕
-                </button>
+                <button type="button" onClick={() => removeTimelineEvent(idx)}
+                  className="text-destructive font-bold" disabled={isLoading}>✕</button>
               </div>
             ))}
           </div>
@@ -576,20 +546,19 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
 
       {/* Important Notes */}
       <div>
-        <label className="block text-sm font-semibold text-primary mb-2">Important Notes (One note per line)</label>
-        <textarea
-          value={notesText}
-          onChange={(e) => setNotesText(e.target.value)}
-          placeholder="Verify all details on official website.&#10;Keep ready: Degree certificate, etc."
+        <label className="block text-sm font-semibold text-primary mb-2">Important Notes <span className="text-muted-foreground text-xs font-normal">(One note per line)</span></label>
+        <textarea value={notesText} onChange={(e) => setNotesText(e.target.value)}
+          placeholder={"Verify all details on official website.\nKeep ready: Degree certificate, etc."}
           rows={4}
           className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm resize-none"
-          disabled={isLoading}
-        />
+          disabled={isLoading} />
       </div>
 
       {/* Application URL */}
       <div>
-        <label className="block text-sm font-semibold text-primary mb-2">Application URL *</label>
+        <label className="block text-sm font-semibold text-primary mb-2">
+          Application URL
+        </label>
         <input
           type="url"
           name="applicationUrl"
@@ -604,35 +573,45 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
       {/* Description */}
       <div>
         <label className="block text-sm font-semibold text-primary mb-2">Description</label>
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleInputChange}
+        <textarea name="description" value={formData.description} onChange={handleInputChange}
           placeholder="Detailed job description"
           rows={5}
           className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm resize-none"
-          disabled={isLoading}
-        />
+          disabled={isLoading} />
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-center items-center gap-4 pt-6 border-t border-border font-semibold text-sm">
+      <div className="flex justify-center items-center gap-4 pt-6 border-t border-border">
         <button
           type="submit"
           disabled={isLoading}
-          className="px-8 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all disabled:opacity-50"
+          className="rounded-md font-bold text-sm text-white transition-all duration-150 hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+          style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5a8e 50%, #1e3a5f 100%)', boxShadow: '0 4px 14px rgba(30,58,95,0.45)', letterSpacing: '0.3px', minWidth: 160, padding: '12px 40px' }}
         >
-          {isLoading ? 'Saving...' : job ? 'Update Job' : 'Create Job'}
+          <span className="flex items-center justify-center gap-2">
+            {isLoading ? (
+              <>
+                <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                Saving...
+              </>
+            ) : (
+              <>{job ? '✏️ Update Job' : '✚ Create Job'}</>
+            )}
+          </span>
         </button>
         <button
           type="button"
           onClick={onCancel}
           disabled={isLoading}
-          className="px-8 py-2.5 bg-muted text-foreground rounded-lg hover:bg-muted/80 border border-border transition-all"
+          className="rounded-md font-bold text-sm transition-all duration-150 hover:opacity-80 active:scale-95 disabled:opacity-50 border-2"
+          style={{ background: 'transparent', borderColor: '#cbd5e1', color: '#64748b', minWidth: 140, padding: '12px 40px' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#f1f5f9'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
         >
-          Cancel
+          ✕ Cancel
         </button>
       </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </form>
   );
 }
