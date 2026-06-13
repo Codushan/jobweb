@@ -47,9 +47,15 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
   const [newEligibility, setNewEligibility] = useState('');
 
   // Date validation state
-  const [deadlineRaw, setDeadlineRaw] = useState(
-    job?.deadline ? new Date(job.deadline).toISOString().split('T')[0] : ''
-  );
+  // Use local date parts so UTC dates stored in MongoDB don't shift by timezone offset
+  const [deadlineRaw, setDeadlineRaw] = useState(() => {
+    if (!job?.deadline) return '';
+    const d = new Date(job.deadline);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  });
   const [deadlineError, setDeadlineError] = useState('');
 
   // Field-level validation errors
@@ -77,7 +83,8 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
       setDeadlineError('Deadline is required.');
       return;
     }
-    const parsed = new Date(deadlineRaw);
+    // Parse as local midnight (no trailing 'Z') to avoid UTC offset shifting the date
+    const parsed = new Date(`${deadlineRaw}T00:00:00`);
     if (isNaN(parsed.getTime())) {
       setDeadlineError('Invalid date. Please enter a valid date (YYYY-MM-DD).');
       return;
@@ -153,7 +160,8 @@ export function AdminJobForm({ job, onSubmit, onCancel }: AdminJobFormProps) {
     setIsLoading(true);
     try {
       const notes = notesText.split('\n').map((l) => l.trim()).filter(Boolean);
-      const dl = new Date(deadlineRaw);
+      // Parse as local midnight (no trailing 'Z') to avoid UTC offset shifting the date back by a day
+      const dl = new Date(`${deadlineRaw}T00:00:00`);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       dl.setHours(0, 0, 0, 0);

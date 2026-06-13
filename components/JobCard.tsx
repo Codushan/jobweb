@@ -67,7 +67,7 @@ export function JobCard({ job, onViewDetails }: JobCardProps) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 text-sm">
         <div>
           <p className="text-muted-foreground text-xs font-semibold">Salary</p>
-          <p className="font-bold text-primary">{job.salary}</p>
+          <p className="font-bold text-primary">₹{job.salary}</p>
         </div>
         <div>
           <p className="text-muted-foreground text-xs font-semibold">Age Limit</p>
