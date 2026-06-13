@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { IJob } from '@/models/Job';
 
 import { LottieLogo } from '@/components/LottieLogo';
+import { AdBanner } from '@/components/AdBanner';
 
 export default function Home() {
   const [jobs, setJobs] = useState<IJob[]>([]);
@@ -893,6 +894,9 @@ export default function Home() {
           <div className="sb-notice">
             <strong>⚠️ Disclaimer</strong>Verify all details on official organisation website. Beware of fake recruitment fraud. Portal aggregates public data only.
           </div>
+
+          {/* Non-intrusive Sidebar Ad */}
+          <AdBanner adSlot="6095147820" adFormat="auto" style={{ display: 'block', width: '100%', minHeight: '250px', marginTop: '16px' }} />
         </aside>
 
         {/* JOBS TABLE */}
@@ -1048,7 +1052,12 @@ export default function Home() {
         </div>
       </div>
 
-
+      {/* Non-intrusive Bottom/Footer Ad */}
+      <AdBanner
+        adSlot="3895147821"
+        adFormat="horizontal"
+        style={{ display: 'block', width: '100%', maxWidth: '1280px', margin: '30px auto 10px', minHeight: '90px', padding: '0 16px' }}
+      />
 
       {/* JOB DETAIL MODAL */}
       {selectedJob && (

@@ -65,6 +65,14 @@ export function AdBanner({ adSlot, adFormat = 'auto', style }: AdBannerProps) {
     return null;
   }
 
+  const insStyle: React.CSSProperties = {
+    display: 'block',
+    width: '100%',
+    margin: 0,
+    padding: 0,
+    ...(adStatus === 'filled' ? (style || { minHeight: '90px' }) : {}),
+  };
+
   return (
     <div
       className="adsense-container"
@@ -83,8 +91,8 @@ export function AdBanner({ adSlot, adFormat = 'auto', style }: AdBannerProps) {
       <ins
         id={`adsense-${adSlot}`}
         className="adsbygoogle"
-        style={style || { display: 'block', width: '100%', minHeight: '90px' }}
-        data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+        style={insStyle}
+        data-ad-client="ca-pub-5720256578139439"
         data-ad-slot={adSlot}
         data-ad-format={adFormat}
         data-full-width-responsive="true"
